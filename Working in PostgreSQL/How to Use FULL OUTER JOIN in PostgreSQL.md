@@ -1,6 +1,6 @@
-In PostgreSQL, the `RIGHT JOIN` (or `RIGHT OUTER JOIN`) is not directly supported. However, you can achieve the same result by reversing the order of the tables in a `LEFT JOIN`. Here's how you can do it:
+In PostgreSQL, the `FULL OUTER JOIN` is not directly supported. However, you can achieve the same result by using a combination of `LEFT JOIN` and `RIGHT JOIN`. Here's how you can do it:
 
-### Using LEFT JOIN to Simulate RIGHT JOIN in PostgreSQL
+### Using LEFT JOIN and RIGHT JOIN to Simulate FULL OUTER JOIN in PostgreSQL
 
 1. **Connect to Your Database**:
    ```bash
@@ -14,20 +14,28 @@ In PostgreSQL, the `RIGHT JOIN` (or `RIGHT OUTER JOIN`) is not directly supporte
    ```
    This command switches your current connection to the specified database.
 
-3. **Perform a LEFT JOIN with Reversed Tables**:
+3. **Perform LEFT JOIN and RIGHT JOIN and Combine Results with UNION**:
    ```sql
+   SELECT table1.column1, table1.column2, table2.column3, ...
+   FROM table1
+   LEFT JOIN table2 ON table1.column_name = table2.column_name
+   UNION
    SELECT table2.column1, table2.column2, table1.column3, ...
    FROM table2
-   LEFT JOIN table1 ON table1.column_name = table2.column_name;
+   LEFT JOIN table1 ON table2.column_name = table1.column_name;
    ```
    Replace `table1`, `table2`, `column1`, `column2`, `column3`, and `column_name` with the appropriate table and column names.
 
    For example:
    ```sql
-   SELECT orders.order_id, customers.customer_name
+   SELECT customers.customer_name, orders.order_id
    FROM customers
-   LEFT JOIN orders ON customers.customer_id = orders.customer_id;
+   LEFT JOIN orders ON customers.customer_id = orders.customer_id
+   UNION
+   SELECT orders.order_id, customers.customer_name
+   FROM orders
+   LEFT JOIN customers ON orders.customer_id = customers.customer_id;
    ```
-   This retrieves order IDs and customer names, effectively simulating a `RIGHT JOIN`.
+   This combines customer names and their associated order IDs, effectively simulating a `FULL OUTER JOIN`.
 
-Remember, this approach essentially reverses the roles of the tables. The table originally on the right side of the `RIGHT JOIN` becomes the left table in this query. It's a workaround for PostgreSQL, which doesn't directly support `RIGHT JOIN`.
+Remember, this approach combines the results of a `LEFT JOIN` and a `RIGHT JOIN` using the `UNION` operator. It's a workaround for PostgreSQL, which doesn't directly support `FULL OUTER JOIN`.
